@@ -1,7 +1,7 @@
 all: clean client serveur
 
 clean:
-	rm -f bin/*
+	rm -rf bin | mkdir bin
 
 client:
 	gcc -pthread -o bin/client src/client.c 
