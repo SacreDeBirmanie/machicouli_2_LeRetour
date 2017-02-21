@@ -108,7 +108,6 @@ static void * commande (void * c){
     //Si le client n'a pas de pseudo
     while(strlen((*client).pseudo)<=1){
         longueur = read((*client).socket, buffer, sizeof(buffer));
-        sleep(3);
         buffer[longueur]='\0';
         int i;
         bool valid=true;
@@ -126,6 +125,7 @@ static void * commande (void * c){
             write(1,buffer,2);
         }else{
             write((*client).socket,"ERROR",5);
+            write(1,"ERROR",5);
         }
     }
 	
@@ -135,7 +135,6 @@ static void * commande (void * c){
 
         buffer[longueur]='\0';
 
-    	sleep(3);
     	// Quitter le serveur
     	if(strcmp(buffer,"/q")==0){
     		printf("%s a entré la commande /q\n", (*client).pseudo);

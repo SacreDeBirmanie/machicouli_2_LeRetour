@@ -114,10 +114,9 @@ int main(int argc, char **argv) {
     
     /** Création du pseudo **/
     
-    printf("Entrez votre pseudo: \n");
-    
     
     while(strcmp(buffer,"OK")!=0){
+        printf("Entrez votre pseudo: \n");
         fgets(pseudo, sizeof pseudo, stdin);
         pseudo[strcspn(pseudo, "\n")] = '\0'; //enlève le caractère de saut de ligne 
         if ((write(socket_descriptor, pseudo, strlen(pseudo))) < 0) {
@@ -126,6 +125,8 @@ int main(int argc, char **argv) {
         }
         longueur = read(socket_descriptor, buffer, sizeof(buffer));
         buffer[longueur] = '\0';
+        if(strcmp(buffer,"ERROR") == 0)
+            printf("Pseudo Invalide\n");
     }
     
     
