@@ -22,6 +22,12 @@ void end_prg(int socket_descriptor){
     exit(0); 
 }
 
+void analyse(char msg[],int socket){
+    if(strcmp(msg,"/q")==0){
+        end_prg(socket);
+    }
+}
+
 void * envoi(void * socket_descriptor){
 	char msg[256];
 	int socket = (int) socket_descriptor;
@@ -33,6 +39,7 @@ void * envoi(void * socket_descriptor){
 		{
 			perror("erreur : impossible d'ecrire le message destine au serveur.");
     	}
+    	analyse(msg,socket);
 	}
 }
 
