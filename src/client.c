@@ -1,7 +1,6 @@
-
 /*-----------------------------------------------------------
 Client a lancer apres le serveur avec la commande :
-client <adresse-serveur> <message-a-transmettre>
+client <hostname>
 ------------------------------------------------------------*/
 #include <stdlib.h>
 #include <stdio.h>
@@ -12,14 +11,10 @@ client <adresse-serveur> <message-a-transmettre>
 #include <pthread.h>
 #include <string.h>
 
-typedef struct sockaddr 
-sockaddr;
-typedef struct sockaddr_in 
-sockaddr_in;
-typedef struct hostent 
-hostent;
-typedef struct servent 
-servent;
+typedef struct sockaddr 	sockaddr;
+typedef struct sockaddr_in 	sockaddr_in;
+typedef struct hostent 		hostent;
+typedef struct servent 		servent;
 
 void end_prg(int socket_descriptor){
     close(socket_descriptor);
@@ -33,7 +28,8 @@ void * envoi(void * socket_descriptor){
 	while(1){
 		memset(msg,0,256);
 		fgets(msg,256,stdin);
-		if(write(socket,msg,strlen(msg))>0)
+        msg[strcspn(msg, "\n")] = '\0';//remplace /n par \0
+		if((write(socket,msg,strlen(msg)))<0)
 		{
 			perror("erreur : impossible d'ecrire le message destine au serveur.");
     	}
@@ -48,38 +44,26 @@ void * reception(void * socket_descriptor){
 		longueur = 0;
 		memset(buffer,0,256);
 		while((longueur = read(socket, buffer, sizeof(buffer))) > 0) {
+            buffer[strcspn(buffer, "\0")] = '\n';
 			write(1,buffer,longueur);
 		}
 	}		
 }
 
 int main(int argc, char **argv) {
-    int t_envoi,
-socket_descriptor, 
-/* descripteur de socket */
-longueur; 
-/* longueur d'un buffer utilisé */
-    sockaddr_in adresse_locale; 
-/* adresse de socket local */
-    hostent *
-ptr_host; 
-/* info sur une machine hote */
-    servent *
-ptr_service; 
-/* info sur service */
-    char 
-buffer[256];
-    char *
-prog; 
-/* nom du programme */
-    char *
-host; 
-/* nom de la machine distante */
-    char *
-mesg; 
-/* message envoyé */
+    int     		socket_descriptor, 	/* descripteur de socket */
+		    		longueur; 		    /* longueur d'un buffer utilisé */
+    sockaddr_in 	adresse_locale; 	/* adresse de socket local */
+    hostent *		ptr_host; 		    /* info sur une machine hote */
+    servent *		ptr_service; 		/* info sur service */
+    char 			buffer[256];
+    char *			prog; 			    /* nom du programme */
+    char *			host; 			    /* nom de la machine distante */
 
-pthread_t thread_envoi, thread_reception;
+    char			pseudo[50];
+
+    pthread_t thread_envoi, thread_reception;
+    
     if (argc != 2) {
 		perror("usage : client <adresse-serveur>");
 		exit(1);
@@ -92,22 +76,19 @@ pthread_t thread_envoi, thread_reception;
 		perror("erreur : impossible de trouver le serveur a partir de son adresse.");
 		exit(1);
     }
+    
     /* copie caractere par caractere des infos de ptr_host vers adresse_locale */
     bcopy((char*)ptr_host->h_addr, (char*)&adresse_locale.sin_addr, ptr_host->h_length);
-    adresse_locale.sin_family = AF_INET; /* ou ptr_host->h_addrtype; */
-    /* 2 facons de definir le service que l'on va utiliser a distance (le même que sur le serveur) */
-    /* (commenter l'une ou l'autre des solutions) */
-    /*-----------------------------------------------------------*/
-    /* SOLUTION 1 : utiliser un service existant, par ex. "irc" */
+    adresse_locale.sin_family = AF_INET; 
+    
+
     
     if ((ptr_service = getservbyname("irc","tcp")) == NULL) {
 		perror("erreur : impossible de recuperer le numero de port du service desire.");
 		exit(1);
     }
     adresse_locale.sin_port = htons(ptr_service->s_port);
-    /*-----------------------------------------------------------*/
-    /* SOLUTION 2 : utiliser un nouveau numero de port */
-    /*adresse_locale.sin_port = htons(5000);
+    
     /*-----------------------------------------------------------*/
     printf("numero de port pour la connexion au serveur : %d \n", ntohs(adresse_locale.sin_port));
     /* creation de la socket */
@@ -121,6 +102,30 @@ pthread_t thread_envoi, thread_reception;
 		exit(1);
     }
     printf("connexion etablie avec le serveur. \n");
+    
+    /*-----------------------------------------------------------*/
+    
+    /** Création du pseudo **/
+    
+    printf("Entrez votre pseudo: \n");
+    fgets(pseudo, sizeof pseudo, stdin);
+    pseudo[strcspn(pseudo, "\n")] = '\0'; //enlève le caractère de saut de ligne 
+    if ((write(socket_descriptor, pseudo, strlen(pseudo))) < 0) {
+        perror("erreur : impossible d'ecrire le message destine au serveur.");
+        exit(1);
+    }
+    printf("__________________________\n");
+    printf("                          \n");
+    printf("/q          - Quitter le serveur\n");
+    printf("/l          - Lister les utilisateurs connectés\n");
+    printf("/h          - Lister les commandes\n");
+    printf("__________________________\n\n");
+    printf("Bien le bonjour %s !\n", pseudo);
+    
+    
+    
+    
+    
     /* envoi du message vers le serveur */
     if(pthread_create(&thread_envoi,NULL,envoi,(void *)socket_descriptor) != 0){
     	perror("erreur création du thread d'envoi des messages");
