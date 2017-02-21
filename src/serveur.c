@@ -109,17 +109,31 @@ static void * commande (void * c){
     while(strlen((*client).pseudo)<=1){
         longueur = read((*client).socket, buffer, sizeof(buffer));
         sleep(3);
-        buffer[longueur]='\0'; 
-        strcpy((*client).pseudo, buffer);
-        write(1,buffer,longueur);//affichage coté serveur
+        buffer[longueur]='\0';
+        int i;
+        bool valid=true;
+        for(i=0;i<taille_tab_clients;i++){
+            if(strcmp(tab_clients[i].pseudo,buffer) == 0)
+                valid = false;
+        }
+        if(valid){
+            strcpy((*client).pseudo, buffer);
+            write(1,buffer,longueur);//affichage coté serveur
+            buffer[0]='O';
+            buffer[1]='K';
+            buffer[2]='\0';
+            write((*client).socket,buffer,2);
+            write(1,buffer,2);
+        }else{
+            write((*client).socket,"ERROR",5);
+        }
     }
 	
 	
     while(1){
     	longueur = read((*client).socket, buffer, sizeof(buffer));
 
-    	//Permet de vider le buffer des ancinnes données
-        buffer[longueur]='\0';    	// explicit null termination: updated based on comments
+        buffer[longueur]='\0';
 
     	sleep(3);
     	// Quitter le serveur

@@ -115,19 +115,27 @@ int main(int argc, char **argv) {
     /** Création du pseudo **/
     
     printf("Entrez votre pseudo: \n");
-    fgets(pseudo, sizeof pseudo, stdin);
-    pseudo[strcspn(pseudo, "\n")] = '\0'; //enlève le caractère de saut de ligne 
-    if ((write(socket_descriptor, pseudo, strlen(pseudo))) < 0) {
-        perror("erreur : impossible d'ecrire le message destine au serveur.");
-        exit(1);
+    
+    
+    while(strcmp(buffer,"OK")!=0){
+        fgets(pseudo, sizeof pseudo, stdin);
+        pseudo[strcspn(pseudo, "\n")] = '\0'; //enlève le caractère de saut de ligne 
+        if ((write(socket_descriptor, pseudo, strlen(pseudo))) < 0) {
+            perror("erreur : impossible d'ecrire le message destine au serveur.");
+            exit(1);
+        }
+        longueur = read(socket_descriptor, buffer, sizeof(buffer));
+        buffer[longueur] = '\0';
     }
+    
+    
     printf("__________________________\n");
     printf("                          \n");
-    printf("/q          - Quitter le serveur\n");
     printf("/l          - Lister les utilisateurs connectés\n");
     printf("/h          - Lister les commandes\n");
+    printf("/q          - Quitter le serveur\n");
     printf("__________________________\n\n");
-    printf("Bien le bonjour %s !\n", pseudo);
+    printf("Bonjour %s .\n", pseudo);
     
     
     
