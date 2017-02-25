@@ -54,6 +54,25 @@ void envoyer_message(Client * client, char msg[]){
         }     
     }    
 }
+
+/**Envoie un message à un client
+@param client émetteur du message
+@param client destinataire du message
+@param msg le message
+*/
+void chuchoter(Client * client,Client * dest, char msg[]){
+    char *answer = malloc (sizeof (*answer) * 256);
+    strcpy(answer, (*client).pseudo);
+    strcat(answer," vous chuchotte : ");
+    strcat(answer,msg);
+    printf("%s\n", answer);
+    int i;
+    if((write((*dest).socket,answer,strlen(answer)+1)) < 0){
+        perror("erreur : impossible d'ecrire le message destine au serveur.");
+        exit(1);
+    } 
+}
+
 /*------------------------------------------------------*/
 //Affiche les informations relatives au clients connectés
 void listerInfo(){
@@ -102,14 +121,20 @@ void supprimerUtilisateur(Client *client_supprime){
 static void * commande (void * c){
     Client * client = (Client *) c;
 	char buffer[256];
+    char substr[10];
 	char *answer = malloc (sizeof (*answer) * 256);
 	int longueur;
-
+    int i;
+    
+    //si whisper
+    Client * dest;
+    char pseudo[50];
+    //
+    
     //Si le client n'a pas de pseudo
     while(strlen((*client).pseudo)<=1){
         longueur = read((*client).socket, buffer, sizeof(buffer));
         buffer[longueur]='\0';
-        int i;
         bool valid=true;
         for(i=0;i<taille_tab_clients;i++){
             if(strcmp(tab_clients[i].pseudo,buffer) == 0)
@@ -134,7 +159,13 @@ static void * commande (void * c){
     	longueur = read((*client).socket, buffer, sizeof(buffer));
 
         buffer[longueur]='\0';
-
+        
+        //récupération des 9 premiers caractères, utile si la chaine contient /whisper
+        if(longueur>=9){
+            memcpy( substr, &buffer[0], 9 );
+            substr[9] = '\0';
+        }
+    	
     	// Quitter le serveur
     	if(strcmp(buffer,"/q")==0){
     		printf("%s a entré la commande /q\n", (*client).pseudo);
@@ -157,7 +188,37 @@ static void * commande (void * c){
             strcpy(answer, "__________________________\n                          \n/q          - Quitter le serveur\n/l          - Lister les utilisateurs connectés\n/h          - Afficher les commandes\n__________________________\n\n");
             //coloriser(answer, 'v');
             write((*client).socket,answer,strlen(answer)+1);  
-        }         
+        }  
+        else if(strcmp(substr,"/whisper ")==0){
+            bool trouve = false;
+            printf("%s a entré la commande /whisper ", (*client).pseudo);
+            //buffer[8]='X';//suppression de l'espace
+            if(longueur>9){
+                char * start = strchr(&buffer,' ');
+                start++;//ptr vers 1ere lettre du pseudo
+                char * end = strchr(start,' ');//ptr vers fin du pseudo
+                char * msg = end+1;
+                *end = '\0';
+                printf("destiné à %s ", start);
+                printf(" message: %s\n", msg);
+                
+                for (i=0;i<taille_tab_clients;i++){
+                    if(strcmp(start,tab_clients[i].pseudo)==0){
+                        trouve = true;
+                        dest = &tab_clients[i];
+                    }     
+                }
+                if(trouve){
+                    printf("destinataire trouvé \n");
+                    chuchoter(client,dest,msg);
+                }
+                else{
+                    printf("ERREUR destinataire inconnu \n");
+                }
+            }
+            
+
+        }   
         //Cas d'un message normale
         else if(longueur > 0){
             envoyer_message(client, buffer);	
@@ -244,7 +305,7 @@ int main(int argc, char **argv) {
                 //création d'un thread pour le client
                 else{
                     tab_clients[taille_tab_clients].pseudo[0] = '\0';
-                    tab_clients[taille_tab_clients].is_connected = 1;                    
+                    tab_clients[taille_tab_clients].is_connected = true;                    
                     tab_clients[taille_tab_clients].socket = nouv_socket_descriptor;
                     if(pthread_create(&tab_clients[taille_tab_clients].thread, NULL, commande, &tab_clients[taille_tab_clients]) != 0){
                         perror("erreur dans la création du thread client");   
