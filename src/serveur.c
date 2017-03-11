@@ -116,6 +116,23 @@ void supprimerUtilisateur(Client *client_supprime){
 }
 /*------------------------------------------------------*/
 
+int verification_pseudo(char[] pseudo, int longueur){
+		int i =0;
+		int resultat = 1;
+		while(i<longueur && resultat == 1 ){
+			int tmp = pseudo[i];
+			if(!(tmp>=48 && tmp<=57)){
+				if(!(tmp>=65 && tmp<=90)){
+					if(!(tmp>=97 && tmp<=122)){
+						resultat = 0;
+					}
+				}
+			}
+			i++;
+		}
+		
+		return resultat;
+}
 
 //Traite les commandes reçues par le client
 static void * commande (void * c){
@@ -135,10 +152,12 @@ static void * commande (void * c){
     while(strlen((*client).pseudo)<=1){
         longueur = read((*client).socket, buffer, sizeof(buffer));
         buffer[longueur]='\0';
-        bool valid=true;
+        int nonValid=0;
         for(i=0;i<taille_tab_clients;i++){
             if(strcmp(tab_clients[i].pseudo,buffer) == 0)
-                valid = false;
+                nonValid = 29;
+            else if(verification_pseudo(buffer, longueur))
+				nonValid = 30;
         }
         if(valid){
             strcpy((*client).pseudo, buffer);
@@ -149,8 +168,8 @@ static void * commande (void * c){
             write((*client).socket,buffer,2);
             write(1,buffer,2);
         }else{
-            write((*client).socket,"ERROR",5);
-            write(1,"ERROR",5);
+            write((*client).socket,"ERROR_"+nonValid,8);
+            write(1,"ERROR_"+nonValid,8);
         }
     }
 	

@@ -125,8 +125,8 @@ int main(int argc, char **argv) {
         }
         longueur = read(socket_descriptor, buffer, sizeof(buffer));
         buffer[longueur] = '\0';
-        if(strcmp(buffer,"ERROR") == 0)
-            printf("Pseudo Invalide\n");
+        if(strcmp(buffer,"ERROR_30") == 0)
+            printf("Pseudo déjà utilisé, choisissez en un autre\n");
     }
     
     
