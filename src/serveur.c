@@ -116,7 +116,7 @@ void supprimerUtilisateur(Client *client_supprime){
 }
 /*------------------------------------------------------*/
 
-int verification_pseudo(char[] pseudo, int longueur){
+int verification_pseudo(char pseudo[], int longueur){
 		int i =0;
 		int resultat = 1;
 		while(i<longueur && resultat == 1 ){
@@ -156,10 +156,10 @@ static void * commande (void * c){
         for(i=0;i<taille_tab_clients;i++){
             if(strcmp(tab_clients[i].pseudo,buffer) == 0)
                 nonValid = 29;
-            else if(verification_pseudo(buffer, longueur))
-				nonValid = 30;
+            //else if(verification_pseudo(buffer, longueur))
+			//	nonValid = 30;
         }
-        if(valid){
+        if(nonValid == 0){
             strcpy((*client).pseudo, buffer);
             write(1,buffer,longueur);//affichage coté serveur
             buffer[0]='O';
