@@ -115,20 +115,25 @@ void supprimerUtilisateur(Client *client_supprime){
     taille_tab_clients--;
 }
 /*------------------------------------------------------*/
-
+/**Verifie si le pseudo respecte les standards du serveur
+cad caractère alphanumérique uniquement
+@param pseudo le pseudo choisi
+@param longueur la longueur du pseudo
+@return vrai si le pseudo est correct faux sinon
+**/
 bool verification_pseudo(char pseudo[], int longueur){
 		int i =0;
         bool resultat = true;
 		while(i<longueur && resultat ){
-			//int tmp = pseudo[i];
-
-			if(!(pseudo[i]>=97 && pseudo[i]<=122)){
-				resultat = false;
-			}
-
+            if(!(pseudo[i]>=48 && pseudo[i]<=57)){
+                if(!(pseudo[i]>=65 && pseudo[i]<=90)){
+        			if(!(pseudo[i]>=97 && pseudo[i]<=122)){
+        				resultat = false;
+        			}
+                }
+            }
 			i++;
-		}
-		
+		}		
 		return resultat;
 }
 
