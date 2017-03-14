@@ -116,7 +116,7 @@ void supprimerUtilisateur(Client *client_supprime){
 }
 /*------------------------------------------------------*/
 
-int verification_pseudo(char[] pseudo, int longueur){
+int verification_pseudo(char pseudo[], int longueur){
 		int i =0;
 		int resultat = 1;
 		while(i<longueur && resultat == 1 ){
@@ -147,19 +147,19 @@ static void * commande (void * c){
     Client * dest;
     char pseudo[50];
     //
-    
+    int nonValid = 0;
     //Si le client n'a pas de pseudo
     while(strlen((*client).pseudo)<=1){
         longueur = read((*client).socket, buffer, sizeof(buffer));
         buffer[longueur]='\0';
-        int nonValid=0;
+        nonValid = 0;
         for(i=0;i<taille_tab_clients;i++){
             if(strcmp(tab_clients[i].pseudo,buffer) == 0)
                 nonValid = 29;
             else if(verification_pseudo(buffer, longueur))
 				nonValid = 30;
         }
-        if(valid){
+        if(nonValid == 0){
             strcpy((*client).pseudo, buffer);
             write(1,buffer,longueur);//affichage coté serveur
             buffer[0]='O';
@@ -167,9 +167,12 @@ static void * commande (void * c){
             buffer[2]='\0';
             write((*client).socket,buffer,2);
             write(1,buffer,2);
+        }else if(nonValid == 29){
+            write((*client).socket,"ERROR_29",8);
+            write(1,"ERROR_29",8);
         }else{
-            write((*client).socket,"ERROR_"+nonValid,8);
-            write(1,"ERROR_"+nonValid,8);
+            write((*client).socket,"ERROR_30",8);
+            write(1,"ERROR_30",8);
         }
     }
 	

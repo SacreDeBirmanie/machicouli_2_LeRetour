@@ -125,8 +125,12 @@ int main(int argc, char **argv) {
         }
         longueur = read(socket_descriptor, buffer, sizeof(buffer));
         buffer[longueur] = '\0';
-        if(strcmp(buffer,"ERROR_30") == 0)
+        if(strcmp(buffer,"ERROR_29") == 0)
             printf("Pseudo déjà utilisé, choisissez en un autre\n");
+        if(strcmp(buffer,"ERROR_30") == 0)
+            printf("Un pseudo doit composé de chiffre et de lettre uniquement\n");
+        else
+            printf("Une erreur est survenu, veuillez réessayer.\n");
     }
     
     
