@@ -129,8 +129,6 @@ int main(int argc, char **argv) {
             printf("Pseudo déjà utilisé, choisissez en un autre\n");
         if(strcmp(buffer,"ERROR_30") == 0)
             printf("Un pseudo doit composé de chiffre et de lettre uniquement\n");
-        else
-            printf("Une erreur est survenu, veuillez réessayer.\n");
     }
     
     

@@ -116,18 +116,16 @@ void supprimerUtilisateur(Client *client_supprime){
 }
 /*------------------------------------------------------*/
 
-int verification_pseudo(char pseudo[], int longueur){
+bool verification_pseudo(char pseudo[], int longueur){
 		int i =0;
-		int resultat = 1;
-		while(i<longueur && resultat == 1 ){
-			int tmp = pseudo[i];
-			if(!(tmp>=48 && tmp<=57)){
-				if(!(tmp>=65 && tmp<=90)){
-					if(!(tmp>=97 && tmp<=122)){
-						resultat = 0;
-					}
-				}
+        bool resultat = true;
+		while(i<longueur && resultat ){
+			//int tmp = pseudo[i];
+
+			if(!(pseudo[i]>=97 && pseudo[i]<=122)){
+				resultat = false;
 			}
+
 			i++;
 		}
 		
@@ -156,7 +154,7 @@ static void * commande (void * c){
         for(i=0;i<taille_tab_clients;i++){
             if(strcmp(tab_clients[i].pseudo,buffer) == 0)
                 nonValid = 29;
-            else if(verification_pseudo(buffer, longueur))
+            else if(!verification_pseudo(buffer, longueur))
 				nonValid = 30;
         }
         if(nonValid == 0){
