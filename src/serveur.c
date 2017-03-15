@@ -245,13 +245,18 @@ static void * commande (void * c){
 								}
 								else{
 									printf("ERREUR destinataire inconnu \n");
+                                    write((*client).socket,"Serveur : ERREUR destinataire inconnu.\n",39);
 								}
 								
-							}else
+							}else{
 								printf("ERREUR PAS DE MESSAGE \n");
+                                write((*client).socket,"Serveur : \\whisper <utilisateur> <message>\n",43);
+                            }
 						
-						}else
+						}else{
 							printf("ERREUR PAS DE MESSAGE \n");
+                            write((*client).socket,"Serveur : \\whisper <utilisateur> <message>\n",43);
+                        }
 					}
             }
             
@@ -259,8 +264,8 @@ static void * commande (void * c){
         }
         //cas d'une commande mal écrite
         else if(buffer[0]=='/'){
-			write((*client).socket,"ERROR_12",8);
-			write(1,"ERROR_12",8);
+			write((*client).socket,"Serveur : Commande inconnue\n",28);
+			write(1,"ERROR_12\n",9);
 		}  
         //Cas d'un message normale
         else if(longueur > 0){
