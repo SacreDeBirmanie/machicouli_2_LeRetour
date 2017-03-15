@@ -101,15 +101,17 @@ char* listeClient(){
 /*------------------------------------------------------*/
 
 void supprimerUtilisateur(Client *client_supprime){
-    Client tmp[MAX_CLIENT];
     int i,j = 0;
     for(i; i<taille_tab_clients; i++){
         if(tab_clients[i].socket != (*client_supprime).socket){
-            tmp[j] = tab_clients[i];
             j++;
         }
         else{
-            close(tab_clients[i].socket);
+            close(tab_clients[i].socket);//fermeture de la socket
+            int k = i;
+            for(k; k<(taille_tab_clients-1); k++){//suppression dans le tableau
+                tab_clients[k] = tab_clients[k+1];
+            }
         }
     }
     taille_tab_clients--;
