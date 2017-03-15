@@ -216,34 +216,49 @@ static void * commande (void * c){
         }  
         else if(strcmp(substr,"/whisper ")==0){
             bool trouve = false;
-            printf("%s a entré la commande /whisper ", (*client).pseudo);
+            printf("%s a entré la commande /whisper \n", (*client).pseudo);
             //buffer[8]='X';//suppression de l'espace
             if(longueur>9){
                 char * start = strchr(&buffer,' ');
-                start++;//ptr vers 1ere lettre du pseudo
-                char * end = strchr(start,' ');//ptr vers fin du pseudo
-                char * msg = end+1;
-                *end = '\0';
-                printf("destiné à %s ", start);
-                printf(" message: %s\n", msg);
-                
-                for (i=0;i<taille_tab_clients;i++){
-                    if(strcmp(start,tab_clients[i].pseudo)==0){
-                        trouve = true;
-                        dest = &tab_clients[i];
-                    }     
-                }
-                if(trouve){
-                    printf("destinataire trouvé \n");
-                    chuchoter(client,dest,msg);
-                }
-                else{
-                    printf("ERREUR destinataire inconnu \n");
-                }
+					start++;//ptr vers 1ere lettre du pseudo
+					if(strlen(start)>0){
+						char * end = strchr(start,' ');//ptr vers fin du pseudo
+						if(end != NULL){
+							char * msg = end+1;
+							if(strlen(msg)>0){
+								*end = '\0';
+								printf("destiné à %s ", start);
+								printf(" message: %s\n", msg);
+						
+								for (i=0;i<taille_tab_clients;i++){
+									if(strcmp(start,tab_clients[i].pseudo)==0){
+										trouve = true;
+										dest = &tab_clients[i];
+									}     
+								}
+								if(trouve){
+									printf("destinataire trouvé \n");
+									chuchoter(client,dest,msg);
+								}
+								else{
+									printf("ERREUR destinataire inconnu \n");
+								}
+								
+							}else
+								printf("ERREUR PAS DE MESSAGE \n");
+						
+						}else
+							printf("ERREUR PAS DE MESSAGE \n");
+					}
             }
             
 
-        }   
+        }
+        //cas d'une commande mal écrite
+        else if(buffer[0]=='/'){
+			write((*client).socket,"ERROR_12",8);
+			write(1,"ERROR_12",8);
+		}  
         //Cas d'un message normale
         else if(longueur > 0){
             envoyer_message(client, buffer);	
