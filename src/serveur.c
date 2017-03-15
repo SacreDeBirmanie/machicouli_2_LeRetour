@@ -9,6 +9,7 @@ Serveur à lancer avant le client
 #include <netdb.h> /* pour hostent, servent */
 #include <string.h> /* pour bcopy, ... */  
 #include <pthread.h>
+#include <unistd.h>
 
 #define TAILLE_MAX_NOM 256
 #define MAX_CLIENT 10

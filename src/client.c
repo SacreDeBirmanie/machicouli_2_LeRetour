@@ -10,6 +10,7 @@ client <hostname>
 #include <string.h>
 #include <pthread.h>
 #include <string.h>
+#include <unistd.h>
 
 typedef struct sockaddr 	sockaddr;
 typedef struct sockaddr_in 	sockaddr_in;
@@ -30,7 +31,7 @@ void analyse(char msg[],int socket){
 
 void * envoi(void * socket_descriptor){
 	char msg[256];
-	int socket = (int) socket_descriptor;
+	int socket = (intptr_t) socket_descriptor;
 	while(1){
 		memset(msg,0,256);
 		fgets(msg,256,stdin);
@@ -46,7 +47,7 @@ void * envoi(void * socket_descriptor){
 void * reception(void * socket_descriptor){
 	int longueur;
 	char buffer[256];
-	int socket = (int) socket_descriptor;
+	int socket = (intptr_t) socket_descriptor;
 	while(1){
 		longueur = 0;
 		memset(buffer,0,256);
@@ -145,12 +146,12 @@ int main(int argc, char **argv) {
     
     
     /* envoi du message vers le serveur */
-    if(pthread_create(&thread_envoi,NULL,envoi,(void *)socket_descriptor) != 0){
+    if(pthread_create(&thread_envoi,NULL,envoi,(void *)(intptr_t)socket_descriptor) != 0){
     	perror("erreur création du thread d'envoi des messages");
     	exit(1);	
     }
     /* lecture de la reponse en provenance du serveur */
-    if(pthread_create(&thread_reception,NULL,reception,(void *)socket_descriptor) != 0){
+    if(pthread_create(&thread_reception,NULL,reception,(void *)(intptr_t)socket_descriptor) != 0){
     	perror("erreur création du thread d'envoi des messages");
     	exit(1);	
     } 
