@@ -19,7 +19,7 @@ typedef struct servent 		servent;
 
 void end_prg(int socket_descriptor){
     close(socket_descriptor);
-    printf("connexion avec le serveur fermee, fin du programme.\n");
+    printf("connexion avec le serveur fermée, fin du programme.\n");
     exit(0); 
 }
 
@@ -40,6 +40,14 @@ void * envoi(void * socket_descriptor){
 		{
 			perror("erreur : impossible d'ecrire le message destine au serveur.");
     	}
+        else{
+            char * display = malloc (sizeof (*display) * (strlen(msg)+17));
+            strcpy(display,"\33[A\33[2KVous : ");
+            strcat(display,msg);
+            strcat(display,"\33[E");
+            write(1,display,strlen(msg)+17);
+            write(1,"\33[B\r",4);
+        }
     	analyse(msg,socket);
 	}
 }
