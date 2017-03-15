@@ -14,6 +14,25 @@ Serveur à lancer avant le client
 #define TAILLE_MAX_NOM 256
 #define MAX_CLIENT 10
 
+
+#define ROUGE  1
+#define VERT  2
+#define JAUNE  3
+#define BLEU  4
+#define MAGENTA  5
+#define CYAN  6
+#define BLANC  7
+
+
+#define KNRM  "\x1B[0m"
+#define KRED  "\x1B[31m"
+#define KGRN  "\x1B[32m"
+#define KYEL  "\x1B[33m"
+#define KBLU  "\x1B[34m"
+#define KMAG  "\x1B[35m"
+#define KCYN  "\x1B[36m"
+#define KWHT  "\x1B[37m"
+
 typedef struct sockaddr sockaddr;
 typedef struct sockaddr_in sockaddr_in;
 typedef struct hostent hostent;
@@ -34,6 +53,40 @@ int taille_tab_clients = 0;                   /*Nombre de clients */
 
 
 /*------------------------------------------------------*/
+
+
+char* coloriser(char* msg, int choix){
+    char *colored_msg = malloc(sizeof (*colored_msg)*strlen(msg)+14);
+
+    switch(choix) {
+        case ROUGE :
+            strcpy(colored_msg, KRED);
+            break;
+        case VERT :
+            strcpy(colored_msg, KGRN);
+            break;
+        case JAUNE :
+            strcpy(colored_msg, KYEL);
+            break;
+        case BLEU :
+            strcpy(colored_msg, KBLU);
+            break;
+        case MAGENTA :
+            strcpy(colored_msg, KMAG);
+            break;
+        case CYAN :
+            strcpy(colored_msg, KCYN);
+            break;
+        case BLANC :
+            strcpy(colored_msg, KWHT);
+            break;                                                      
+        default :
+            printf("Erreur lors de la colorisation\n" );
+    }
+    strcat(colored_msg, msg);
+    strcat(colored_msg, KNRM);
+    return colored_msg;
+}
 
 /**Envoie un message à tous les clients
 @param client émetteur du message
@@ -66,9 +119,7 @@ void chuchoter(Client * client,Client * dest, char msg[]){
     strcpy(answer, (*client).pseudo);
     strcat(answer," vous chuchotte : ");
     strcat(answer,msg);
-    printf("%s\n", answer);
-    int i;
-    if((write((*dest).socket,answer,strlen(answer)+1)) < 0){
+    if((write((*dest).socket, coloriser(answer,BLEU),strlen(answer)+16)) < 0){
         perror("erreur : impossible d'ecrire le message destine au serveur.");
         exit(1);
     } 
@@ -148,7 +199,7 @@ static void * commande (void * c){
 	char *answer = malloc (sizeof (*answer) * 256);
 	int longueur;
     int i;
-    
+    char *error = malloc(sizeof(*error)*57);
     //si whisper
     Client * dest;
     char pseudo[50];
@@ -200,27 +251,28 @@ static void * commande (void * c){
             strcpy(answer, (*client).pseudo);
             strcat(answer," a quitté le serveur.\n");
            	//coloriser(answer, 'm');
-           	envoyer_message(client, answer);
+           	envoyer_message(client, coloriser(answer,ROUGE));
            	supprimerUtilisateur(client);
             pthread_exit(NULL);
     	}
     	// Lister les utilisateurs connectés
     	else if(strcmp(buffer,"/l")==0){
     		printf("%s a entré la commande /l\n", (*client).pseudo);
-    		strcpy(answer, listeClient());
+    		strcpy(answer, coloriser(listeClient(),VERT));
     		//coloriser(answer, 'v');
     		write((*client).socket,answer,strlen(answer)+1); 
     	}
         else if(strcmp(buffer,"/h")==0){
             printf("%s a entré la commande /h\n", (*client).pseudo);
-            strcpy(answer, "__________________________\n                          \n/q          - Quitter le serveur\n/l          - Lister les utilisateurs connectés\n/h          - Afficher les commandes\n__________________________\n\n");
-            //coloriser(answer, 'v');
+            strcpy(answer, "__________________________\n                          \n/whisper <utilisateur> <message> - Envoyer un message privé à un utilisateur\n/q - Quitter le serveur\n/l - Lister les utilisateurs connectés\n/h - Afficher les commandes\n__________________________\n\n");
+            
             write((*client).socket,answer,strlen(answer)+1);  
         }  
         else if(strcmp(substr,"/whisper ")==0){
             bool trouve = false;
             printf("%s a entré la commande /whisper \n", (*client).pseudo);
             //buffer[8]='X';//suppression de l'espace
+            
             if(longueur>9){
                 char * start = strchr(&buffer,' ');
 					start++;//ptr vers 1ere lettre du pseudo
@@ -245,17 +297,20 @@ static void * commande (void * c){
 								}
 								else{
 									printf("ERREUR destinataire inconnu \n");
-                                    write((*client).socket,"Serveur : ERREUR destinataire inconnu.\n",39);
+                                    strcpy(error,"Serveur : ERREUR destinataire inconnu.");
+                                    write((*client).socket,coloriser(error,JAUNE),52);
 								}
 								
 							}else{
 								printf("ERREUR PAS DE MESSAGE \n");
-                                write((*client).socket,"Serveur : \\whisper <utilisateur> <message>\n",43);
+                                strcpy(error,"Serveur : \\whisper <utilisateur> <message>");
+                                write((*client).socket,coloriser(error,JAUNE),56);
                             }
 						
 						}else{
 							printf("ERREUR PAS DE MESSAGE \n");
-                            write((*client).socket,"Serveur : \\whisper <utilisateur> <message>\n",43);
+                            strcpy(error,"Serveur : \\whisper <utilisateur> <message>");
+                            write((*client).socket,coloriser(error,JAUNE),56);
                         }
 					}
             }
@@ -264,7 +319,8 @@ static void * commande (void * c){
         }
         //cas d'une commande mal écrite
         else if(buffer[0]=='/'){
-			write((*client).socket,"Serveur : Commande inconnue\n",28);
+            strcpy(error,"Serveur : Commande inconnue");
+			write((*client).socket,coloriser(error,JAUNE),42);
 			write(1,"ERROR_12\n",9);
 		}  
         //Cas d'un message normale
