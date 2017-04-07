@@ -144,7 +144,7 @@ int main(int argc, char **argv) {
     printf("__________________________\n");
     printf("                          \n");
     printf("/l - Lister les utilisateurs connectés\n");
-    printf("/whisper <utilisateur> <message> - Envoyer un message privé à un utilisateur\n");
+    printf("/w <utilisateur> <message> - Envoyer un message privé à un utilisateur\n");
     printf("/h - Lister les commandes\n");
     printf("/q - Quitter le serveur\n");
     printf("__________________________\n\n");

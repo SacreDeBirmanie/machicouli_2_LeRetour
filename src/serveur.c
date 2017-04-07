@@ -119,7 +119,7 @@ void chuchoter(Client * client,Client * dest, char msg[]){
     strcpy(answer, (*client).pseudo);
     strcat(answer," vous chuchotte : ");
     strcat(answer,msg);
-    if((write((*dest).socket, coloriser(answer,BLEU),strlen(answer)+16)) < 0){
+    if((write((*dest).socket, coloriser(answer,MAGENTA),strlen(answer)+16)) < 0){
         perror("erreur : impossible d'ecrire le message destine au serveur.");
         exit(1);
     } 
@@ -237,10 +237,10 @@ static void * commande (void * c){
 
         buffer[longueur]='\0';
         
-        //récupération des 9 premiers caractères, utile si la chaine contient /whisper
-        if(longueur>=9){
-            memcpy( substr, &buffer[0], 9 );
-            substr[9] = '\0';
+        //récupération des 3 premiers caractères, utile si la chaine contient /w
+        if(longueur>=3){
+            memcpy( substr, &buffer[0], 3 );
+            substr[3] = '\0';
         }
     	
     	// Quitter le serveur
@@ -262,16 +262,16 @@ static void * commande (void * c){
     	}
         else if(strcmp(buffer,"/h")==0){
             printf("%s a entré la commande /h\n", (*client).pseudo);
-            strcpy(answer, "__________________________\n                          \n/whisper <utilisateur> <message> - Envoyer un message privé à un utilisateur\n/q - Quitter le serveur\n/l - Lister les utilisateurs connectés\n/h - Afficher les commandes\n__________________________\n\n");
+            strcpy(answer, "__________________________\n                          \n/w <utilisateur> <message> - Envoyer un message privé à un utilisateur\n/q - Quitter le serveur\n/l - Lister les utilisateurs connectés\n/h - Afficher les commandes\n__________________________\n\n");
             
             write((*client).socket,answer,strlen(answer)+1);  
         }  
-        else if(strcmp(substr,"/whisper ")==0){
+        else if(strcmp(substr,"/w ")==0){
             bool trouve = false;
-            printf("%s a entré la commande /whisper \n", (*client).pseudo);
+            printf("%s a entré la commande /w \n", (*client).pseudo);
             //buffer[8]='X';//suppression de l'espace
             
-            if(longueur>9){
+            if(longueur>3){
                 char * start = strchr(&buffer,' ');
 					start++;//ptr vers 1ere lettre du pseudo
 					if(strlen(start)>0){
@@ -301,13 +301,13 @@ static void * commande (void * c){
 								
 							}else{
 								printf("ERREUR PAS DE MESSAGE \n");
-                                strcpy(error,"Serveur : \\whisper <utilisateur> <message>");
+                                strcpy(error,"Serveur : \\w <utilisateur> <message>");
                                 write((*client).socket,coloriser(error,JAUNE),56);
                             }
 						
 						}else{
 							printf("ERREUR PAS DE MESSAGE \n");
-                            strcpy(error,"Serveur : \\whisper <utilisateur> <message>");
+                            strcpy(error,"Serveur : \\w <utilisateur> <message>");
                             write((*client).socket,coloriser(error,JAUNE),56);
                         }
 					}
@@ -323,7 +323,7 @@ static void * commande (void * c){
 		}  
         //Cas d'un message normale
         else if(longueur > 0){
-            envoyer_message(client, buffer);	
+            envoyer_message(client, coloriser(buffer,BLEU));	
     	}
     }
 }
