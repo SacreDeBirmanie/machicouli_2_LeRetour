@@ -1,0 +1,24 @@
+\section{Choix de conception}
+Lors de la réalisation de notre application nous avons été amené à faire des choix que nous argumenteront ici.
+\subsection{Le client}
+Dans l'application, un client est défini comme étant une structure comportant un tableau de char de taille 50 servant pour le pseudonyme, un socket, un booléen indiquant si le client est connecté ou non et un thread qui réceptionne les message transmis via le socket.
+\subsection{Le pseudonyme}
+Dans notre application, les utilisateurs sont identifié par un pseudonyme unique. Dans le cadre d'une application client serveur, il est possible d'utiliser les sockets pour identifier les clients puisque ceux-ci sont unique. Cependant, d'un point de vue utilisateur un pseudonyme est plus facile à utiliser. Nous avons décidé qu'un pseudonyme serait de taille inférieur à 50. Avoir un grand pseudo n'apporte rien de plus à l'utilisateur et peut occasionner des erreurs de fautes frappes lors d'un message privés. un pseudonyme ne peut être composé uniquement de caractère alphanumérique afin d'éviter de possible confusion avec les commandes. Si l'utilisateur viole l'une de ces deux conditions ou si le pseudonyme choisis est déjà pris l'utilisateur reçois un message l'informant des causes de l'échec du choix de pseudonyme et est invité à réessayer.  
+\subsection{Le message}
+Les messages envoyés ont une taille maximale de 256 caractères. Il nous fallait fixer une taille limite pour les messages. nous avons décidé de prendre pour valeur maximale 256, ainsi l'utilisateur n'est pas gêné cars les messages de plus de 256 caractères restent rares. Si l'utilisateur envoie un message de plus de 256 caractères il est découpé en plusieurs messages. Une taille de message trop petite ferait que les messages seraient sans cesse découpés causant des soucis de lisibilité au niveau de l'interface. et une taille plus élevé prendrait plus de place en mémoire.
+
+Les messages envoyés sont encodés en UTF-8. Notre application supporte ainsi les accents et les émoticônes.
+\section{Améliorations}
+à la suite de la démo, il a été relevé que notre programme ne supportait pas le "Ctrl-C". ainsi une de nos premières modifications a été d'implémenter le "Ctrl-C". Dorénavant quand un client exécute cette action le programme se termine "proprement" ne causant aucune fermeture du serveur et les autres clients sont avertit de la déconnexion de l'utilisateur.
+
+Nous avons aussi revu les couleurs de l'interface afin de mieux visualiser le message écrit par l'utilisateur des messages reçus par les autres clients lorsque ces messages viennent à se chevaucher dans l'interface.
+
+La dernière amélioration apporté concerne le nom de la commande pour envoyer un message privé. Elle a été renommé en /w car son ancien nom /whisper s'est révélé peu commode à utiliser.
+
+\section{Difficultés rencontrés}
+Dans ce projet nous avons été confronté à la barrière du langage. Encore aujourd'hui, le C reste pour un langage difficile à aborder et notre projet a pris du retard à cause d'erreurs que nous rencontrions causé par les spécificités du C. Ainsi, nous n'avons pu implémenter tout ce que nous voulions et nous sommes conscients des améliorations qu'il reste a
+apporter tel qu'une interface graphique afin de se débarrasser du terminal ou encore un la possibilité d'envoyer des fichiers ou des images en guise d'émoticône.  
+
+
+
+
