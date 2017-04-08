@@ -2,6 +2,7 @@
 Client a lancer apres le serveur avec la commande :
 client <hostname>
 ------------------------------------------------------------*/
+#include <signal.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <linux/types.h>
@@ -11,11 +12,14 @@ client <hostname>
 #include <pthread.h>
 #include <string.h>
 #include <unistd.h>
+#include <stdbool.h>
 
 typedef struct sockaddr 	sockaddr;
 typedef struct sockaddr_in 	sockaddr_in;
 typedef struct hostent 		hostent;
 typedef struct servent 		servent;
+
+bool stop = false;
 
 void end_prg(int socket_descriptor){
     close(socket_descriptor);
@@ -66,6 +70,20 @@ void * reception(void * socket_descriptor){
 	}		
 }
 
+void * end_signal(void * socket_descriptor){
+    int socket = (intptr_t) socket_descriptor;
+    while(1){
+        if(stop){
+            write(socket,"/q",2);
+            end_prg(socket_descriptor);
+        }
+    }
+}
+
+void signal_handler(sig_t s){
+    stop = true;
+}
+
 int main(int argc, char **argv) {
     int     		socket_descriptor, 	/* descripteur de socket */
 		    		longueur; 		    /* longueur d'un buffer utilisé */
@@ -78,7 +96,8 @@ int main(int argc, char **argv) {
 
     char			pseudo[50];
 
-    pthread_t thread_envoi, thread_reception;
+    pthread_t thread_envoi, thread_reception , thread_signal;
+
     
     if (argc != 2) {
 		perror("usage : client <adresse-serveur>");
@@ -149,10 +168,8 @@ int main(int argc, char **argv) {
     printf("/q - Quitter le serveur\n");
     printf("__________________________\n\n");
     printf("Bonjour %s .\n", pseudo);
-    
-    
-    
-    
+
+    signal(SIGINT, signal_handler);
     
     /* envoi du message vers le serveur */
     if(pthread_create(&thread_envoi,NULL,envoi,(void *)(intptr_t)socket_descriptor) != 0){
@@ -164,7 +181,13 @@ int main(int argc, char **argv) {
     	perror("erreur création du thread d'envoi des messages");
     	exit(1);	
     } 
+    /* capture du ctrl_c */
+    if(pthread_create(&thread_signal,NULL,end_signal,(void *)(intptr_t)socket_descriptor) != 0){
+    	perror("erreur création du thread d'envoi des messages");
+    	exit(1);	
+    } 
 
+    pthread_join(thread_signal,NULL);
     pthread_join(thread_envoi,NULL);
     pthread_join(thread_reception,NULL);
 }

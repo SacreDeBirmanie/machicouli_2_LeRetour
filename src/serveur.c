@@ -176,6 +176,8 @@ cad caractère alphanumérique uniquement
 bool verification_pseudo(char pseudo[], int longueur){
 		int i =0;
         bool resultat = true;
+        //if(longueur>49)
+          //  resultat = false;
 		while(i<longueur && resultat ){
             if(!(pseudo[i]>=48 && pseudo[i]<=57)){
                 if(!(pseudo[i]>=65 && pseudo[i]<=90)){
